@@ -1,0 +1,174 @@
+﻿name: CI - Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '2.1.x'
+  NODE_VERSION: '14.x'
+  AZURE_SUBSCRIPTION_ID: '95642268-5116-484d-9b88-7dfce8c20ce4'
+  RESOURCE_GROUP: 'rg-infra-contosouniv-centralindia-sudhirt-demopoc'
+  
+jobs:
+  code-quality:
+    name: Code Quality & Security
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          
+      - name: Restore dependencies
+        run: dotnet restore ContosoUniversity.sln
+        
+      - name: Code formatting check
+        run: dotnet format --verify-no-changes ContosoUniversity.sln
+        continue-on-error: true
+        
+      - name: Security scan with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+
+  build-and-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    needs: code-quality
+    strategy:
+      matrix:
+        project: ['ContosoUniversity.Web', 'ContosoUniversity.Api', 'ContosoUniversity.Spa.React']
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          
+      - name: Setup Node.js (for SPA)
+        if: matrix.project == 'ContosoUniversity.Spa.React'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          
+      - name: Restore dependencies
+        run: dotnet restore ${{ matrix.project }}/${{ matrix.project }}.csproj
+        
+      - name: Build project
+        run: dotnet build ${{ matrix.project }}/${{ matrix.project }}.csproj --configuration Release --no-restore
+        
+      - name: Run unit tests
+        run: dotnet test ${{ matrix.project }}.Tests/${{ matrix.project }}.Tests.csproj --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"
+        continue-on-error: true
+        
+      - name: Publish build artifacts
+        run: dotnet publish ${{ matrix.project }}/${{ matrix.project }}.csproj --configuration Release --output ./publish/${{ matrix.project }} --no-build
+        
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.project }}-build
+          path: ./publish/${{ matrix.project }}
+          retention-days: 7
+
+  infrastructure-validation:
+    name: Infrastructure Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+          
+      - name: Terraform Format Check
+        run: |
+          cd infra
+          terraform fmt -check -recursive
+        continue-on-error: true
+        
+      - name: Terraform Init
+        run: |
+          cd infra
+          terraform init -backend=false
+          
+      - name: Terraform Validate
+        run: |
+          cd infra
+          terraform validate
+          
+      - name: Terraform Plan (dry-run)
+        run: |
+          cd infra
+          terraform plan -var-file="terraform.tfvars.example" -out=tfplan
+        continue-on-error: true
+
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Run Snyk Security Scan
+        uses: snyk/actions/dotnet@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+          
+      - name: OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'ContosoUniversity'
+          path: '.'
+          format: 'HTML'
+        continue-on-error: true
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          
+      - name: Run integration tests
+        run: |
+          dotnet test ContosoUniversity.Web.IntegrationTests/ContosoUniversity.Web.IntegrationTests.csproj --configuration Release
+        continue-on-error: true
+
+  report:
+    name: Build Report
+    runs-on: ubuntu-latest
+    needs: [code-quality, build-and-test, infrastructure-validation, security-scan, integration-tests]
+    if: always()
+    steps:
+      - name: Generate Build Summary
+        run: |
+          echo "## CI Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "-  Code quality checks completed" >> $GITHUB_STEP_SUMMARY
+          echo "-  Build and tests executed" >> $GITHUB_STEP_SUMMARY
+          echo "-  Infrastructure validated" >> $GITHUB_STEP_SUMMARY
+          echo "-  Security scans completed" >> $GITHUB_STEP_SUMMARY

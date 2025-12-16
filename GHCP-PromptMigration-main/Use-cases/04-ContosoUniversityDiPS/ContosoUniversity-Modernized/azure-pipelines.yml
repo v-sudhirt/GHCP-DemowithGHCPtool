@@ -1,0 +1,225 @@
+﻿# Azure DevOps Pipeline for ContosoUniversity
+# Supports both CI and CD processes
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+  paths:
+    include:
+      - ContosoUniversity.*/*
+      - infra/*
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+variables:
+  - group: contosouniversity-variables
+  - name: azureSubscription
+    value: 'Azure-Connection'
+  - name: subscriptionId
+    value: '95642268-5116-484d-9b88-7dfce8c20ce4'
+  - name: dotnetVersion
+    value: '2.1.x'
+  - name: buildConfiguration
+    value: 'Release'
+  - name: resourceGroup
+    value: 'rg-infra-contosouniv-centralindia-sudhirt-demopoc'
+  - name: webAppName
+    value: 'app-infra-contosouniv-centralindia-sudhirt-demopoc-web'
+  - name: apiAppName
+    value: 'app-infra-contosouniv-centralindia-sudhirt-demopoc-api'
+  - name: spaAppName
+    value: 'app-infra-contosouniv-centralindia-sudhirt-demopoc-spa'
+  - name: spaAppName
+    value: 'app-infra-contosouniv-centralindia-sudhirt-demopoc-spa'
+
+stages:
+  - stage: Build
+    displayName: 'Build and Test'
+    jobs:
+      - job: BuildWeb
+        displayName: 'Build Web Application'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET Core SDK'
+            inputs:
+              packageType: 'sdk'
+              version: '$(dotnetVersion)'
+              
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore NuGet packages'
+            inputs:
+              command: 'restore'
+              projects: 'ContosoUniversity.Web/ContosoUniversity.Web.csproj'
+              
+          - task: DotNetCoreCLI@2
+            displayName: 'Build project'
+            inputs:
+              command: 'build'
+              projects: 'ContosoUniversity.Web/ContosoUniversity.Web.csproj'
+              arguments: '--configuration $(buildConfiguration)'
+              
+          - task: DotNetCoreCLI@2
+            displayName: 'Run unit tests'
+            inputs:
+              command: 'test'
+              projects: 'ContosoUniversity.Web.Tests/ContosoUniversity.Web.Tests.csproj'
+              arguments: '--configuration $(buildConfiguration) --collect:"XPlat Code Coverage"'
+              
+          - task: DotNetCoreCLI@2
+            displayName: 'Publish'
+            inputs:
+              command: 'publish'
+              projects: 'ContosoUniversity.Web/ContosoUniversity.Web.csproj'
+              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/web'
+              zipAfterPublish: true
+              
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Web artifacts'
+            inputs:
+              pathToPublish: '$(Build.ArtifactStagingDirectory)/web'
+              artifactName: 'web-drop'
+              
+      - job: BuildAPI
+        displayName: 'Build API Application'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET Core SDK'
+            inputs:
+              packageType: 'sdk'
+              version: '$(dotnetVersion)'
+              
+          - task: DotNetCoreCLI@2
+            displayName: 'Restore, Build, Test'
+            inputs:
+              command: 'build'
+              projects: 'ContosoUniversity.Api/ContosoUniversity.Api.csproj'
+              arguments: '--configuration $(buildConfiguration)'
+              
+          - task: DotNetCoreCLI@2
+            displayName: 'Publish'
+            inputs:
+              command: 'publish'
+              projects: 'ContosoUniversity.Api/ContosoUniversity.Api.csproj'
+              arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/api'
+              zipAfterPublish: true
+              
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish API artifacts'
+            inputs:
+              pathToPublish: '$(Build.ArtifactStagingDirectory)/api'
+              artifactName: 'api-drop'
+              
+      - job: ValidateInfrastructure
+        displayName: 'Validate Infrastructure'
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: TerraformInstaller@0
+            displayName: 'Install Terraform'
+            inputs:
+              terraformVersion: '1.5.0'
+              
+          - task: TerraformTaskV4@4
+            displayName: 'Terraform Init'
+            inputs:
+              provider: 'azurerm'
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/infra'
+              backendServiceArm: 'Azure-Connection'
+              
+          - task: TerraformTaskV4@4
+            displayName: 'Terraform Validate'
+            inputs:
+              provider: 'azurerm'
+              command: 'validate'
+              workingDirectory: '$(System.DefaultWorkingDirectory)/infra'
+
+  - stage: DeployStaging
+    displayName: 'Deploy to Staging'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+    jobs:
+      - deployment: DeployInfrastructure
+        displayName: 'Deploy Infrastructure'
+        environment: 'staging'
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: TerraformTaskV4@4
+                  displayName: 'Terraform Apply'
+                  inputs:
+                    provider: 'azurerm'
+                    command: 'apply'
+                    workingDirectory: '$(Pipeline.Workspace)/infra'
+                    environmentServiceNameAzureRM: 'Azure-Connection'
+                    
+      - deployment: DeployApplications
+        displayName: 'Deploy Applications'
+        dependsOn: DeployInfrastructure
+        environment: 'staging'
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureWebApp@1
+                  displayName: 'Deploy Web App'
+                  inputs:
+                    azureSubscription: 'Azure-Connection'
+                    appType: 'webApp'
+                    appName: '$(webAppName)'
+                    package: '$(Pipeline.Workspace)/web-drop/*.zip'
+                    
+                - task: AzureWebApp@1
+                  displayName: 'Deploy API App'
+                  inputs:
+                    azureSubscription: 'Azure-Connection'
+                    appType: 'webApp'
+                    appName: '$(apiAppName)'
+                    package: '$(Pipeline.Workspace)/api-drop/*.zip'
+
+  - stage: DeployProduction
+    displayName: 'Deploy to Production'
+    dependsOn: DeployStaging
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployProduction
+        displayName: 'Deploy to Production'
+        environment: 'production'
+        pool:
+          vmImage: 'ubuntu-latest'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: AzureWebApp@1
+                  displayName: 'Deploy Web App to Production'
+                  inputs:
+                    azureSubscription: 'Azure-Connection'
+                    appType: 'webApp'
+                    appName: '$(webAppName)'
+                    package: '$(Pipeline.Workspace)/web-drop/*.zip'
+                    deploymentMethod: 'zipDeploy'
+                    
+                - task: AzureWebApp@1
+                  displayName: 'Deploy API App to Production'
+                  inputs:
+                    azureSubscription: 'Azure-Connection'
+                    appType: 'webApp'
+                    appName: '$(apiAppName)'
+                    package: '$(Pipeline.Workspace)/api-drop/*.zip'
+                    deploymentMethod: 'zipDeploy'

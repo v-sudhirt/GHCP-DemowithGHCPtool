@@ -1,0 +1,35 @@
+﻿# Example Terraform Variables File
+# Copy this file to terraform.tfvars and fill in your values
+
+# Azure Subscription Details
+subscription_id = \"8cff5c8a-98f3-44ad-b300-2d44716c802c\"  # Service 360 Test
+# tenant_id = \"\"  # Auto-detected
+
+# Environment name (dev, staging, prod)
+environment = \"dev\"
+
+# Azure region for resources
+location = "eastus"
+
+# SQL Server admin credentials (keep these secure!)
+sql_admin_login = "sqladmin"
+sql_admin_password = "YourSecurePassword123!"  # Min 12 chars, must include uppercase, lowercase, numbers
+
+# Microsoft Entra ID admin for SQL Server
+# Get your object ID with: az ad user show --id your-email@domain.com --query id -o tsv
+entra_admin_object_id = "00000000-0000-0000-0000-000000000000"
+entra_admin_login = "your-email@domain.com"
+
+# App Service SKUs (adjust based on workload)
+web_app_sku = "B2"  # Basic tier: 2 cores, 3.5GB RAM - for Web MVC app
+api_app_sku = "B2"  # Basic tier: 2 cores, 3.5GB RAM - for REST API
+spa_app_sku = "B1"  # Basic tier: 1 core, 1.75GB RAM - for React SPA
+
+# Database SKU
+database_sku = "S1"  # Standard tier: 20 DTUs, 250GB max
+
+# Private endpoints (set to true for production)
+enable_private_endpoints = false
+
+# VNet integration (set to true if using private endpoints)
+enable_vnet_integration = false

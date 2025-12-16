@@ -1,0 +1,20 @@
+﻿# Azure Developer CLI configuration for ContosoUniversity
+name: contosouniversity
+metadata:
+  template: contosouniversity-modernized
+
+services:
+  web:
+    project: ./ContosoUniversity.Web
+    language: csharp
+    host: appservice
+    
+  api:
+    project: ./ContosoUniversity.Api
+    language: csharp
+    host: appservice
+    
+  spa:
+    project: ./ContosoUniversity.Spa.React
+    language: csharp
+    host: appservice

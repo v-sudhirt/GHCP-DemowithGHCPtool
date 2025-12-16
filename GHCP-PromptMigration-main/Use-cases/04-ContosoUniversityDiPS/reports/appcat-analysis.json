@@ -1,0 +1,404 @@
+{
+  "settings": {
+    "components": {
+      "code": true,
+      "binaries": false
+    },
+    "targetId": "Any"
+  },
+  "analysisStartTime": "2025-12-10T13:11:32.8977059Z",
+  "analysisEndTime": "2025-12-10T13:12:08.940866Z",
+  "privacyMode": "Unrestricted",
+  "privacyModeHelpUrl": "https://go.microsoft.com/fwlink/?linkid=2271074",
+  "stats": {
+    "summary": {
+      "projects": 8,
+      "issues": 3,
+      "incidents": 13,
+      "effort": 39
+    },
+    "charts": {
+      "severity": {
+        "Mandatory": 8,
+        "Optional": 2,
+        "Potential": 3,
+        "Information": 0
+      },
+      "category": {
+        "Runtime": 8,
+        "Scale": 2,
+        "Connection": 3
+      }
+    }
+  },
+  "projects": [
+    {
+      "path": "ContosoUniversity.Api\\ContosoUniversity.Api.csproj",
+      "startingProject": true,
+      "issues": 3,
+      "storyPoints": 9,
+      "properties": {
+        "appName": "ContosoUniversity.Api",
+        "frameworks": [
+          "netcoreapp2.1"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ]
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "37009221-b79c-4d2b-8c88-a3dc2fc1433c",
+          "ruleId": "Runtime.0001",
+          "projectPath": "ContosoUniversity.Api\\ContosoUniversity.Api.csproj",
+          "state": "Active",
+          "location": {
+            "kind": "File",
+            "path": "ContosoUniversity.Api\\ContosoUniversity.Api.csproj",
+            "snippet": "Target framework: netcoreapp2.1"
+          }
+        },
+        {
+          "incidentId": "be53b7bc-2d2a-449d-9a82-594a178c88cd",
+          "ruleId": "Scale.0001",
+          "projectPath": "ContosoUniversity.Api\\ContosoUniversity.Api.csproj",
+          "state": "Active",
+          "location": {
+            "kind": "File",
+            "path": "ContosoUniversity.Api\\ContosoUniversity.Api.csproj",
+            "snippet": "Found 10 files matching the rule:\r\n\r\nwwwroot\\index.html\r\nwwwroot\\swagger\\ui\\css\\custom.css\r\nwwwroot\\swagger\\ui\\favicon-16x16.png\r\nwwwroot\\swagger\\ui\\favicon-32x32.png\r\nwwwroot\\swagger\\ui\\index.html\r\nwwwroot\\swagger\\ui\\oauth2-redirect.html\r\nwwwroot\\swagger\\ui\\swagger-ui-bundle.js\r\nwwwroot\\swagger\\ui\\swagger-ui-standalone-preset.js\r\nwwwroot\\swagger\\ui\\swagger-ui.css\r\nwwwroot\\swagger\\ui\\swagger-ui.js\r\n"
+          }
+        },
+        {
+          "incidentId": "09eb740f-7e88-4ac3-9786-810092acccef",
+          "ruleId": "Connection.0001",
+          "projectPath": "ContosoUniversity.Api\\ContosoUniversity.Api.csproj",
+          "state": "Active",
+          "location": {
+            "kind": "File",
+            "path": "ContosoUniversity.Api\\appsettings.json",
+            "snippet": "\u0022DefaultConnection\u0022: \u0022Server=localhost,1433;Database=ContosoUniversity2017;User Id=sa;Password=YourStrong@Passw0rd;\u0022"
+          }
+        }
+      ]
+    },
+    {
+      "path": "ContosoUniversity.Api.Tests\\ContosoUniversity.Api.Tests.csproj",
+      "startingProject": true,
+      "issues": 1,
+      "storyPoints": 3,
+      "properties": {
+        "appName": "ContosoUniversity.Api.Tests",
+        "frameworks": [
+          "netcoreapp2.1"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ]
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "f0dc8d85-e7ff-4527-81f0-a617923fb4f0",
+          "ruleId": "Runtime.0001",
+          "projectPath": "ContosoUniversity.Api.Tests\\ContosoUniversity.Api.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "kind": "File",
+            "path": "ContosoUniversity.Api.Tests\\ContosoUniversity.Api.Tests.csproj",
+            "snippet": "Target framework: netcoreapp2.1"
+          }
+        }
+      ]
+    },
+    {
+      "path": "ContosoUniversity.Common\\ContosoUniversity.Common.csproj",
+      "startingProject": true,
+      "issues": 1,
+      "storyPoints": 3,
+      "properties": {
+        "appName": "ContosoUniversity.Common",
+        "frameworks": [
+          "netcoreapp2.1"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ]
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "46756e59-0154-45dd-9a89-81d768daed41",
+          "ruleId": "Runtime.0001",
+          "projectPath": "ContosoUniversity.Common\\ContosoUniversity.Common.csproj",
+          "state": "Active",
+          "location": {
+            "kind": "File",
+            "path": "ContosoUniversity.Common\\ContosoUniversity.Common.csproj",
+            "snippet": "Target framework: netcoreapp2.1"
+          }
+        }
+      ]
+    },
+    {
+      "path": "ContosoUniversity.Data\\ContosoUniversity.Data.csproj",
+      "startingProject": true,
+      "issues": 1,
+      "storyPoints": 3,
+      "properties": {
+        "appName": "ContosoUniversity.Data",
+        "frameworks": [
+          "netcoreapp2.1"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ]
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "481e2f52-a860-461c-98c8-864de97710b8",
+          "ruleId": "Runtime.0001",
+          "projectPath": "ContosoUniversity.Data\\ContosoUniversity.Data.csproj",
+          "state": "Active",
+          "location": {
+            "kind": "File",
+            "path": "ContosoUniversity.Data\\ContosoUniversity.Data.csproj",
+            "snippet": "Target framework: netcoreapp2.1"
+          }
+        }
+      ]
+    },
+    {
+      "path": "ContosoUniversity.Data.Tests\\ContosoUniversity.Data.Tests.csproj",
+      "startingProject": true,
+      "issues": 1,
+      "storyPoints": 3,
+      "properties": {
+        "appName": "ContosoUniversity.Data.Tests",
+        "frameworks": [
+          "netcoreapp2.1"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ]
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "2c17f93d-ef31-4778-a121-93e780dcc67a",
+          "ruleId": "Runtime.0001",
+          "projectPath": "ContosoUniversity.Data.Tests\\ContosoUniversity.Data.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "kind": "File",
+            "path": "ContosoUniversity.Data.Tests\\ContosoUniversity.Data.Tests.csproj",
+            "snippet": "Target framework: netcoreapp2.1"
+          }
+        }
+      ]
+    },
+    {
+      "path": "ContosoUniversity.Spa.React\\ContosoUniversity.Spa.React.csproj",
+      "startingProject": true,
+      "issues": 2,
+      "storyPoints": 6,
+      "properties": {
+        "appName": "ContosoUniversity.Spa.React",
+        "frameworks": [
+          "netcoreapp2.1"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ]
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "6a9fedd8-c5d8-4a39-b0cd-1e0067fbab62",
+          "ruleId": "Runtime.0001",
+          "projectPath": "ContosoUniversity.Spa.React\\ContosoUniversity.Spa.React.csproj",
+          "state": "Active",
+          "location": {
+            "kind": "File",
+            "path": "ContosoUniversity.Spa.React\\ContosoUniversity.Spa.React.csproj",
+            "snippet": "Target framework: netcoreapp2.1"
+          }
+        },
+        {
+          "incidentId": "df1a6d77-a4d1-4ee4-b8ab-5cd2b2176bbd",
+          "ruleId": "Connection.0001",
+          "projectPath": "ContosoUniversity.Spa.React\\ContosoUniversity.Spa.React.csproj",
+          "state": "Active",
+          "location": {
+            "kind": "File",
+            "path": "ContosoUniversity.Spa.React\\appsettings.json",
+            "snippet": "\u0022DefaultConnection\u0022: \u0022Server=localhost,1433;Database=ContosoUniversity2017;User Id=sa;Password=YourStrong@Passw0rd;\u0022"
+          }
+        }
+      ]
+    },
+    {
+      "path": "ContosoUniversity.Web\\ContosoUniversity.Web.csproj",
+      "startingProject": true,
+      "issues": 3,
+      "storyPoints": 9,
+      "properties": {
+        "appName": "ContosoUniversity.Web",
+        "frameworks": [
+          "netcoreapp2.1"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ]
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "57afccb1-2fb0-45d6-89ec-1a712368eb49",
+          "ruleId": "Runtime.0001",
+          "projectPath": "ContosoUniversity.Web\\ContosoUniversity.Web.csproj",
+          "state": "Active",
+          "location": {
+            "kind": "File",
+            "path": "ContosoUniversity.Web\\ContosoUniversity.Web.csproj",
+            "snippet": "Target framework: netcoreapp2.1"
+          }
+        },
+        {
+          "incidentId": "b2e6ee14-9740-475d-8623-51ff5eacc782",
+          "ruleId": "Scale.0001",
+          "projectPath": "ContosoUniversity.Web\\ContosoUniversity.Web.csproj",
+          "state": "Active",
+          "location": {
+            "kind": "File",
+            "path": "ContosoUniversity.Web\\ContosoUniversity.Web.csproj",
+            "snippet": "Found 11 files matching the rule:\r\n\r\nwwwroot\\css\\site.css\r\nwwwroot\\css\\site.min.css\r\nwwwroot\\favicon.ico\r\nwwwroot\\images\\banner1.svg\r\nwwwroot\\images\\banner2.svg\r\nwwwroot\\images\\banner3.svg\r\nwwwroot\\images\\banner4.svg\r\nwwwroot\\js\\site.js\r\nwwwroot\\js\\site.min.js\r\nwwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js\r\nwwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js\r\n"
+          }
+        },
+        {
+          "incidentId": "1e691ec1-01fe-49b6-bb0d-929a6a101f14",
+          "ruleId": "Connection.0001",
+          "projectPath": "ContosoUniversity.Web\\ContosoUniversity.Web.csproj",
+          "state": "Active",
+          "location": {
+            "kind": "File",
+            "path": "ContosoUniversity.Web\\appsettings.json",
+            "snippet": "\u0022DefaultConnection\u0022: \u0022Server=(localdb)\\mssqllocaldb;Database=ContosoUniversity2017;Trusted_Connection=True;MultipleActiveResultSets=true\u0022"
+          }
+        }
+      ]
+    },
+    {
+      "path": "ContosoUniversity.Web.Tests\\ContosoUniversity.Web.Tests.csproj",
+      "startingProject": true,
+      "issues": 1,
+      "storyPoints": 3,
+      "properties": {
+        "appName": "ContosoUniversity.Web.Tests",
+        "frameworks": [
+          "netcoreapp2.1"
+        ],
+        "languages": [
+          "C#"
+        ],
+        "tools": [
+          "MSBuild"
+        ]
+      },
+      "ruleInstances": [
+        {
+          "incidentId": "4374ced1-1e9f-4c7e-a95a-0afb82cba112",
+          "ruleId": "Runtime.0001",
+          "projectPath": "ContosoUniversity.Web.Tests\\ContosoUniversity.Web.Tests.csproj",
+          "state": "Active",
+          "location": {
+            "kind": "File",
+            "path": "ContosoUniversity.Web.Tests\\ContosoUniversity.Web.Tests.csproj",
+            "snippet": "Target framework: netcoreapp2.1"
+          }
+        }
+      ]
+    }
+  ],
+  "rules": {
+    "Runtime.0001": {
+      "id": "Runtime.0001",
+      "description": "Out of support .NET target framework is detected.\n\n.NETCoreApp or .NET 5.0 target frameworks are out of support and Azure App Service sandbox does not have runtime installed for them. It is recommended to upgrade to .NET 8\u002B or deploy your application in a self-contained mode which would allow you to bring framework dependencies with your application.\n\nAlternatively, you could deploy your application to Azure App Service as a container and manage the contents of the container yourself, while keeping other benefits of App Service.\n\nOther alternatives, depending on the architecture of the application, could be to host your app in Azure VM, ACR or Azure Kubernetes service.",
+      "label": "Out of support .NET target framework is detected",
+      "severity": "Mandatory",
+      "effort": 3,
+      "links": [
+        {
+          "title": ".NET on Azure App Service",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2251907"
+        },
+        {
+          "title": "Containers on Azure App Service",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2251908"
+        },
+        {
+          "title": "Azure Virtual Machines",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2251557"
+        },
+        {
+          "title": "Upgrade to latest .NET with Upgrade Assistant",
+          "url": "https://go.microsoft.com/fwlink/?LinkID=2202641"
+        }
+      ]
+    },
+    "Scale.0001": {
+      "id": "Scale.0001",
+      "description": "Static content detected.\n\nYour current approach of serving static content directly might lead to increased costs, performance issues, maintenance challenges (requiring application redeployment for content changes), and security risks.\n\nConsider moving static content to Azure Blob Storage and adding Azure CDN.",
+      "label": "Static content detected",
+      "severity": "Optional",
+      "effort": 3,
+      "links": [
+        {
+          "title": "Azure Blob Storage",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2250574"
+        },
+        {
+          "title": "Azure CDN",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2250392"
+        }
+      ]
+    },
+    "Connection.0001": {
+      "id": "Connection.0001",
+      "description": "Connection string detected. It may not be available when your app is migrated to Azure.\n\nReview and ensure it works from Azure. If you are connecting to a database, you might need to migrate the database to Azure. There are multiple ways to do it:\n    1. Migrate to Azure SQL Database for additional benefits (see the link below).\n    2. Consider Azure SQL Managed Instance if you need features that are not available in Azure SQL Database and you don\u2019t want to use a VM.\n    3. Migrate your database servers directly to SQL Server on Azure VMs.\n\nTo assess database migration effort, you can use Azure Migrate tool, see the link below.",
+      "label": "Connection string is detected",
+      "severity": "Potential",
+      "effort": 3,
+      "links": [
+        {
+          "title": "Migrate SQL Server database to Azure",
+          "url": "https://go.microsoft.com/fwlink/?LinkID=2251731"
+        },
+        {
+          "title": "Azure SQL Managed Instance",
+          "url": "https://go.microsoft.com/fwlink/?LinkID=2251613"
+        },
+        {
+          "title": "Azure Migrate",
+          "url": "https://go.microsoft.com/fwlink/?linkid=2252410"
+        }
+      ]
+    }
+  }
+}

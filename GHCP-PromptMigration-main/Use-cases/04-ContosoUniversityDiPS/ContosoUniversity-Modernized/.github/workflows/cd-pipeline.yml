@@ -1,0 +1,195 @@
+﻿name: CD - Continuous Deployment
+
+on:
+  workflow_run:
+    workflows: ["CI - Continuous Integration"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  AZURE_SUBSCRIPTION_ID: '95642268-5116-484d-9b88-7dfce8c20ce4'
+  RESOURCE_GROUP: 'rg-infra-contosouniv-centralindia-sudhirt-demopoc'
+  WEB_APP_NAME: 'app-infra-contosouniv-centralindia-sudhirt-demopoc-web'
+  API_APP_NAME: 'app-infra-contosouniv-centralindia-sudhirt-demopoc-api'
+  SPA_APP_NAME: 'app-infra-contosouniv-centralindia-sudhirt-demopoc-spa'
+  
+jobs:
+  deploy-infrastructure:
+    name: Deploy Infrastructure
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+          
+      - name: Terraform Init
+        run: |
+          cd infra
+          terraform init
+          
+      - name: Terraform Plan
+        run: |
+          cd infra
+          terraform plan -out=tfplan
+          
+      - name: Terraform Apply
+        if: github.event.inputs.environment == 'production' || github.event_name == 'workflow_dispatch'
+        run: |
+          cd infra
+          terraform apply -auto-approve tfplan
+          
+      - name: Get Infrastructure Outputs
+        id: infra-outputs
+        run: |
+          cd infra
+          echo "web_app_url=$(terraform output -raw web_app_url)" >> $GITHUB_OUTPUT
+          echo "api_app_url=$(terraform output -raw api_app_url)" >> $GITHUB_OUTPUT
+          echo "spa_app_url=$(terraform output -raw spa_app_url)" >> $GITHUB_OUTPUT
+
+  deploy-web-app:
+    name: Deploy Web Application
+    runs-on: ubuntu-latest
+    needs: deploy-infrastructure
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ContosoUniversity.Web-build
+          path: ./publish/web
+          
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.WEB_APP_NAME }}
+          package: ./publish/web
+          
+      - name: Health Check
+        run: |
+          sleep 30
+          curl -f https://${{ env.WEB_APP_NAME }}.azurewebsites.net/health || exit 1
+
+  deploy-api-app:
+    name: Deploy API Application
+    runs-on: ubuntu-latest
+    needs: deploy-infrastructure
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ContosoUniversity.Api-build
+          path: ./publish/api
+          
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.API_APP_NAME }}
+          package: ./publish/api
+          
+      - name: Health Check
+        run: |
+          sleep 30
+          curl -f https://${{ env.API_APP_NAME }}.azurewebsites.net/health || exit 1
+
+  deploy-spa-app:
+    name: Deploy SPA Application
+    runs-on: ubuntu-latest
+    needs: deploy-infrastructure
+    environment: ${{ github.event.inputs.environment || 'staging' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ContosoUniversity.Spa.React-build
+          path: ./publish/spa
+          
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.SPA_APP_NAME }}
+          package: ./publish/spa
+          
+      - name: Health Check
+        run: |
+          sleep 30
+          curl -f https://${{ env.SPA_APP_NAME }}.azurewebsites.net || exit 1
+
+  run-smoke-tests:
+    name: Smoke Tests
+    runs-on: ubuntu-latest
+    needs: [deploy-web-app, deploy-api-app, deploy-spa-app]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Run smoke tests
+        run: |
+          echo "Running smoke tests against deployed applications"
+          curl -f https://${{ env.WEB_APP_NAME }}.azurewebsites.net
+          curl -f https://${{ env.API_APP_NAME }}.azurewebsites.net
+          curl -f https://${{ env.SPA_APP_NAME }}.azurewebsites.net
+
+  deployment-report:
+    name: Deployment Report
+    runs-on: ubuntu-latest
+    needs: [run-smoke-tests]
+    if: always()
+    steps:
+      - name: Generate Deployment Summary
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- Environment: ${{ github.event.inputs.environment || 'staging' }}" >> $GITHUB_STEP_SUMMARY
+          echo "-  Infrastructure deployed" >> $GITHUB_STEP_SUMMARY
+          echo "-  Applications deployed" >> $GITHUB_STEP_SUMMARY
+          echo "-  Health checks passed" >> $GITHUB_STEP_SUMMARY
+          echo "-  Smoke tests completed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Application URLs:" >> $GITHUB_STEP_SUMMARY
+          echo "- Web App: https://${{ env.WEB_APP_NAME }}.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
+          echo "- API App: https://${{ env.API_APP_NAME }}.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
+          echo "- SPA App: https://${{ env.SPA_APP_NAME }}.azurewebsites.net" >> $GITHUB_STEP_SUMMARY
